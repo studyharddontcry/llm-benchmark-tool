@@ -1,5 +1,3 @@
-# metrics.py
-
 import logging
 import subprocess
 import tempfile

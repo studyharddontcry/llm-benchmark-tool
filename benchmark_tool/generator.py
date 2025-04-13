@@ -68,7 +68,7 @@ Constraints:
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
 
-    def generate(self, description: str) -> str:
+    def generate(self, description: str) -> tuple[str, float]:
         """
         Generates a Python function based on the given description.
 
@@ -122,4 +122,4 @@ Constraints:
 
         result = '\n'.join(cleaned_lines).strip()
         self.logger.info("Code generated successfully.\nGenerated code:\n%s", result)
-        return result
+        return result, self.generation_time
