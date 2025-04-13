@@ -138,7 +138,7 @@ class CodeMetrics:
             if os.path.exists(tmpfile_path):
                 os.remove(tmpfile_path)
 
-    def _measure_memory_and_runtime(self, code_str: str) -> (float, float):
+    def _measure_memory_and_runtime(self, code_str: str) -> tuple[float, float]:
         """
         Loads the generated code in-process, tries to call the first function found,
         and measures approximate memory usage (peak) plus execution time.
