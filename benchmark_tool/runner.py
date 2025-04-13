@@ -31,17 +31,17 @@ def main():
     # 1) Instantiate the Generator with user-specified or default model
     generator = CodeGenerator(model_name=args.model, temperature=args.temperature)
 
-    # 2) Generate code based on the user's description
-    code_str = generator.generate(args.description)
+    # 2) Generate code based on the user's description and capture time
+    code_str, generation_time = generator.generate(args.description)
 
     # 3) Test the generated code
     tester = CodeTester()
     success, test_output = tester.test_code(code_str)
     test_success = success  # True/False
 
-    # 4) Compute metrics (e.g., pass/fail, style, complexity)
+    # 4) Compute metrics (e.g., pass/fail, style, complexity) and pass generation_time to evaluate
     metrics_calculator = CodeMetrics()
-    results = metrics_calculator.evaluate(code_str, test_success)
+    results = metrics_calculator.evaluate(code_str, test_success, generation_time)
 
     # 5) Print output
     print("=== Generated Code ===")
