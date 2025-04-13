@@ -5,15 +5,14 @@ import os
 import re
 from typing import Dict, Any, Optional
 
-# Additional libraries for style and complexity:
-# pip install pycodestyle radon
-# For memory measurement, we use tracemalloc built into Python 3.8+
+# For memory measurement: tracemalloc for Python 3.8+
 
 import pycodestyle
 import json
 import time
 import tracemalloc
 import ast
+import sys
 
 
 class CodeMetrics:
@@ -59,12 +58,16 @@ class CodeMetrics:
             "pep8_violations": 0,
             # 3) Complexity:
             "avg_cyclomatic_complexity": 0.0,
-            # 4) Memory usage (in KB):
+            # 4) Memory usage (in kB):
             "memory_usage_kb": 0.0,
             # 5) Code generation time (seconds):
             "generation_time_s": generation_time,
             # 6) Code runtime time (seconds):
-            "runtime_time_s": 0.0
+            "runtime_time_s": 0.0,
+            # 7) Standard library usage:
+            "std_lib_usage": 0,
+            # 8) Third-party library usage:
+            "third_party_imports": 0
         }
 
         # Measure style violations (PEP 8):
@@ -77,6 +80,11 @@ class CodeMetrics:
         mem_usage_kb, runtime_s = self._measure_memory_and_runtime(code_str)
         metrics["memory_usage_kb"] = mem_usage_kb
         metrics["runtime_time_s"] = runtime_s
+        
+        # Count standard and third-party library imports
+        std_libs, third_party = self._analyze_imports(code_str)
+        metrics["std_lib_imports"] = std_libs
+        metrics["third_party_imports"] = third_party
 
         return metrics
 
@@ -142,7 +150,7 @@ class CodeMetrics:
         and measures approximate memory usage (peak) plus execution time.
 
         Returns:
-            memory_usage_kb (float): approximate peak memory usage in KB
+            memory_usage_kb (float): approximate peak memory usage in kB
             runtime_s (float): time in seconds to import and call the function
 
         If no function is found, we just import the code for measurement.
@@ -188,12 +196,12 @@ class CodeMetrics:
         # Compute time
         runtime_s = end_time - start_time
 
-        # Compute memory usage difference in KB
+        # Compute memory usage difference in kB
         stats = end_snapshot.compare_to(start_snapshot, 'lineno')
         # peak usage is not directly provided by default; we look at total allocated vs. freed
         # For a simple measure, let's sum up net allocations
         total_alloc = sum(stat.size_diff for stat in stats)
-        # Convert bytes to KB
+        # Convert bytes to kB
         peak_mem_kb = float(total_alloc) / 1024.0
 
         return (peak_mem_kb, runtime_s)
@@ -208,3 +216,38 @@ class CodeMetrics:
         if match:
             return match.group(1)
         return None
+
+    def _analyze_imports(self, code_str: str) -> tuple[int, int]:
+        """
+        Analyzes the code to count standard library and third-party imports.
+        
+        Returns:
+            tuple[int, int]: Count of (standard_library_imports, third_party_imports)
+        """
+        try:
+            tree = ast.parse(code_str)
+            std_libs = set()
+            third_party = set()
+            
+            # Get list of standard library modules
+            stdlib_modules = set(sys.stdlib_module_names)
+            
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    for name in node.names:
+                        module = name.name.split('.')[0]
+                        if module in stdlib_modules:
+                            std_libs.add(module)
+                        else:
+                            third_party.add(module)
+                elif isinstance(node, ast.ImportFrom):
+                    module = node.module.split('.')[0] if node.module else ''
+                    if module in stdlib_modules:
+                        std_libs.add(module)
+                    else:
+                        third_party.add(module)
+                        
+            return len(std_libs), len(third_party)
+        except Exception as e:
+            self.logger.error("Error analyzing imports: %s", e)
+            return 0, 0
