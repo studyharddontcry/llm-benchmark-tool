@@ -1,8 +1,10 @@
 import argparse
 import sys
+from typing import List, Dict, Any
 from generator import CodeGenerator
 from tester import CodeTester
 from metrics import CodeMetrics
+from tqdm import tqdm
 
 def main():
     parser = argparse.ArgumentParser(
@@ -26,34 +28,65 @@ def main():
         required=True,
         help="A short description of the function or code you want to generate."
     )
+    parser.add_argument(
+        "--runs",
+        type=int,
+        default=10,
+        help="Number of code generations to run (default: 10)"
+    )
     args = parser.parse_args()
 
-    # 1) Instantiate the Generator with user-specified or default model
     generator = CodeGenerator(model_name=args.model, temperature=args.temperature)
-
-    # 2) Generate code based on the user's description and capture time
-    code_str, generation_time = generator.generate(args.description)
-
-    # 3) Test the generated code
     tester = CodeTester()
-    success, test_output = tester.test_code(code_str)
-    test_success = success  # True/False
-
-    # 4) Compute metrics (e.g., pass/fail, style, complexity) and pass generation_time to evaluate
     metrics_calculator = CodeMetrics()
-    results = metrics_calculator.evaluate(code_str, test_success, generation_time)
-
-    # 5) Print output
-    print("=== Generated Code ===")
-    print(code_str)
-    print("\n=== Test Output ===")
-    print(test_output)
-    print("\n=== Metrics ===")
-    for key, val in results.items():
-        print(f"{key}: {val}")
-
-    # Optional: Return non-zero exit code if tests failed
-    sys.exit(0 if success else 1)
+    
+    all_metrics: List[Dict[str, Any]] = []
+    all_codes: List[str] = []
+    all_test_outputs: List[str] = []
+    
+    print(f"Running {args.runs} generations for: {args.description}\n")
+    print("=" * 80)  # Initial separator
+    
+    # Run multiple generations
+    for i in tqdm(range(args.runs), desc="Generating and testing code"):
+        print(f"\nGeneration {i+1}/{args.runs}:")
+        
+        # Generate and test code
+        code_str, generation_time = generator.generate(args.description)
+        success, test_output = tester.test_code(code_str)
+        
+        # Calculate metrics
+        results = metrics_calculator.evaluate(code_str, success, generation_time)
+        
+        # Store results
+        all_metrics.append(results)
+        all_codes.append(code_str)
+        all_test_outputs.append(test_output)
+        
+        # Print individual results
+        print(f"Success: {success}")
+        print("Individual metrics:", results)
+        print("_" * 80)  # Separator between generations
+    
+    # Calculate and print averages
+    avg_metrics = metrics_calculator.average_metrics(all_metrics)
+    
+    print("\n" + "=" * 80)
+    print(f"\nSUMMARY FOR: {args.description}")
+    print("=" * 80)
+    print("\nAVERAGE METRICS ACROSS ALL RUNS:")
+    print("-" * 40)
+    for key, val in avg_metrics.items():
+        print(f"{key:.<30} {val:.4f}")
+    # print("\nDETAILED RESULTS:")
+    # print("-" * 40)
+    
+    # success_count = sum(1 for m in all_metrics if m['success'] == 1)
+    # print(f"Successful generations: {success_count}/{args.runs} ({(success_count/args.runs)*100:.1f}%)")
+    
+    # # Exit with success if more than 50% of generations succeeded
+    # success_rate = avg_metrics['success']
+    # sys.exit(0 if success_rate >= 0.5 else 1)
 
 if __name__ == "__main__":
     main()

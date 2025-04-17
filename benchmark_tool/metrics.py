@@ -3,7 +3,7 @@ import subprocess
 import tempfile
 import os
 import re
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 # For memory measurement: tracemalloc for Python 3.8+
 
@@ -65,7 +65,7 @@ class CodeMetrics:
             # 6) Code runtime time (seconds):
             "runtime_time_s": 0.0,
             # 7) Standard library usage:
-            "std_lib_usage": 0,
+            "std_lib_imports": 0,
             # 8) Third-party library usage:
             "third_party_imports": 0
         }
@@ -251,3 +251,23 @@ class CodeMetrics:
         except Exception as e:
             self.logger.error("Error analyzing imports: %s", e)
             return 0, 0
+
+    def average_metrics(self, metrics_list: List[Dict[str, Any]]) -> Dict[str, float]:
+        """
+        Calculates average values for each metric across multiple runs.
+        
+        Args:
+            metrics_list: List of metric dictionaries from multiple runs
+            
+        Returns:
+            Dict containing averaged values for each metric
+        """
+        if not metrics_list:
+            return {}
+            
+        averaged = {}
+        for key in metrics_list[0].keys():
+            values = [m[key] for m in metrics_list]
+            averaged[key] = sum(values) / len(values)
+            
+        return averaged
