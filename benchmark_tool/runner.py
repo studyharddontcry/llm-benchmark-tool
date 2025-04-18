@@ -78,15 +78,6 @@ def main():
     print("-" * 40)
     for key, val in avg_metrics.items():
         print(f"{key:.<30} {val:.4f}")
-    # print("\nDETAILED RESULTS:")
-    # print("-" * 40)
-    
-    # success_count = sum(1 for m in all_metrics if m['success'] == 1)
-    # print(f"Successful generations: {success_count}/{args.runs} ({(success_count/args.runs)*100:.1f}%)")
-    
-    # # Exit with success if more than 50% of generations succeeded
-    # success_rate = avg_metrics['success']
-    # sys.exit(0 if success_rate >= 0.5 else 1)
 
 if __name__ == "__main__":
     main()
