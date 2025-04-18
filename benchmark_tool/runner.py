@@ -45,7 +45,7 @@ def main():
     all_test_outputs: List[str] = []
     
     print(f"Running {args.runs} generations for: {args.description}\n")
-    print("=" * 80)  # Initial separator
+    print("=" * 80)
     
     # Run multiple generations
     for i in tqdm(range(args.runs), desc="Generating and testing code"):
@@ -65,7 +65,7 @@ def main():
         
         # Print individual results
         print(f"Success: {success}")
-        print("Individual metrics:", results)
+        print("Metrics for this run:", results)
         print("_" * 80)  # Separator between generations
     
     # Calculate and print averages
