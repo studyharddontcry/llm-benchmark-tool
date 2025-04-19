@@ -4,6 +4,25 @@ from langchain.prompts.chat import ChatPromptTemplate, SystemMessagePromptTempla
 from langchain_ollama import OllamaLLM
 from langchain_core.runnables import RunnablePassthrough
 
+import ast, textwrap, re
+
+def _strip_trailing_prose(code: str) -> str:
+    """
+    Return the longest prefix of `code` that parses with `ast.parse`.
+    Drop any trailing narrative text that would break syntax.
+    """
+    lines = code.splitlines()
+    for i in range(len(lines), 0, -1):
+        candidate = "\n".join(lines[:i])
+        try:
+            ast.parse(candidate)
+            return candidate.strip()
+        except SyntaxError:
+            continue
+    # if nothing parses, return original
+    return code.strip()
+
+
 class CodeGenerator:
     """
     A class to generate Python functions using a language model (with a fixed system prompt).
@@ -122,14 +141,16 @@ Constraints:
 
         result = '\n'.join(cleaned_lines).strip()
         
-        code_lines = []
-        for line in result.splitlines():
-            if line.strip().startswith("import ") or line.strip().startswith("def ") or line.startswith(" "):
-                code_lines.append(line)
-            else:
-                # stop at the first narrative line
-                break
-        result = "\n".join(code_lines).strip()
+        # code_lines = []
+        # for line in result.splitlines():
+        #     if line.strip().startswith("import ") or line.strip().startswith("def ") or line.startswith(" "):
+        #         code_lines.append(line)
+        #     else:
+        #         # stop at the first narrative line
+        #         break
+        # result = "\n".join(code_lines).strip()
+        
+        result = _strip_trailing_prose(result)
     
         self.logger.info("Code generated successfully.\nGenerated code:\n%s", result)
         return result, self.generation_time
