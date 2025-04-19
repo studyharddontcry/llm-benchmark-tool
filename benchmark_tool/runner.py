@@ -120,7 +120,7 @@ def main(argv: List[str] | None = None) -> None:
     for k, v in report["reference"].items():
         print(f"{k:.<35} {v:.4f}")
     
-    print("\nAVERAGE RAW METRICS ACROSS RUNS")
+    print("\nAVERAGE RAW METRICS ACROSS LLM RUNS")
     print("-" * 40)
     for k, v in report["avg"].items():
         print(f"{k:.<35} {v:.4f}")
