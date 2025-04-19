@@ -4,14 +4,17 @@ import tempfile
 import os
 import re
 from typing import Dict, Any, Optional, List
+
 import pycodestyle
 import json
 import time
 import tracemalloc # For memory measurement: tracemalloc for Python 3.8+
 import ast
 import sys
+
 from pathlib import Path
 from functools import lru_cache
+import csv
 
 
 HUMAN_CODE_DIR = Path(__file__).parent / "HumanWrittenCodes"
@@ -25,6 +28,24 @@ COST_METRICS    = {                             # lower is better
     "std_lib_imports",
     "third_party_imports",
 }
+
+CSV_HEADER = [
+    "model",
+    "temperature",
+    "task",
+    "run_ix",
+    "generation_time_s",
+    "ratio_success",
+    "ratio_pep8_violations",
+    "ratio_avg_cyclomatic_complexity",
+    "ratio_memory_usage_kb",
+    "ratio_runtime_time_s",
+    "ratio_std_lib_imports",
+    "ratio_third_party_imports",
+]
+CSV_PATH = Path(__file__).resolve().parent / "results" / "benchmark_metrics.csv"
+CSV_PATH.parent.mkdir(exist_ok=True)
+
 
 class CodeMetrics:
     """
@@ -333,13 +354,21 @@ class CodeMetrics:
 
             if key in BENEFIT_METRICS:
                 ratio = gen_val / ref_val
-            elif key in COST_METRICS:
-                ratio = ref_val / gen_val
-            else:
-                # by default treat as cost (conservative)
+            else: # by default treat as cost
                 ratio = ref_val / gen_val
 
             ratios[f"ratio_{key}"] = ratio
 
         return ratios
+    
+    def append_csv_row(self, row: Dict[str, Any]) -> None:
+        """Append a single row (dict) to the results CSV, writing header if needed."""
+        # ensure header order and missing keys → blank
+        ordered_row = {h: row.get(h, "") for h in CSV_HEADER}
+        write_header = not CSV_PATH.exists()
+        with CSV_PATH.open("a", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=CSV_HEADER)
+            if write_header:
+                writer.writeheader()
+            writer.writerow(ordered_row)
 
