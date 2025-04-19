@@ -125,7 +125,12 @@ class CodeMetrics:
         Runs pycodestyle on the code string and returns the number of style violations.
         If pycodestyle is not installed or there's an error, returns -1 as fallback.
         """
-        with tempfile.NamedTemporaryFile(suffix=".py", delete=False, mode="w") as tmpfile:
+        with tempfile.NamedTemporaryFile(
+            suffix=".py", 
+            delete=False, 
+            mode="w",
+            encoding="utf-8"
+        ) as tmpfile:
             tmpfile.write(code_str)
             tmpfile_path = tmpfile.name
 
@@ -147,7 +152,12 @@ class CodeMetrics:
         Returns the average complexity across all blocks.
         If radon isn't installed or there's an error, returns -1.
         """
-        with tempfile.NamedTemporaryFile(suffix=".py", delete=False, mode="w") as tmpfile:
+        with tempfile.NamedTemporaryFile(
+            suffix=".py", 
+            delete=False, 
+            mode="w",
+            encoding="utf-8"
+        ) as tmpfile:
             tmpfile.write(code_str)
             tmpfile_path = tmpfile.name
 
