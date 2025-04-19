@@ -361,15 +361,15 @@ class CodeMetrics:
 
         return ratios
     
-    def append_csv_row(self, row: Dict[str, Any]) -> None:
-        """Append a single row (dict) to the results CSV, writing header if needed."""
-        # ensure header order and missing keys → blank
-        ordered_row = {h: row.get(h, "") for h in CSV_HEADER}
-        
-        write_header = not CSV_PATH.exists()
-        with CSV_PATH.open("a", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=CSV_HEADER)
-            if write_header:
-                writer.writeheader()
-            writer.writerow(ordered_row)
+def append_csv_row(self, row: Dict[str, Any]) -> None:
+    """Append a single row (dict) to the results CSV, writing header if needed."""
+    # ensure header order and missing keys → blank
+    ordered_row = {h: row.get(h, "") for h in CSV_HEADER}
+    
+    write_header = not CSV_PATH.exists()
+    with CSV_PATH.open("a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=CSV_HEADER)
+        if write_header:
+            writer.writeheader()
+        writer.writerow(ordered_row)
 
