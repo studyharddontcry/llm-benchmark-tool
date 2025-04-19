@@ -16,8 +16,8 @@ from pathlib import Path
 from functools import lru_cache
 import csv
 
-
-HUMAN_CODE_DIR = Path(__file__).parent / "HumanWrittenCodes"
+PROJECT_ROOT = Path(r"C:\Users\bv2504\Documents\Studium\Ing\DATA_ENG_OBOR\Diplom_Thesis\benchmark_tool")
+HUMAN_CODE_DIR = PROJECT_ROOT / "HumanWrittenCodes"
 
 BENEFIT_METRICS = {"success"}                   # higher is better
 COST_METRICS    = {                             # lower is better  

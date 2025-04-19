@@ -1,0 +1,4 @@
+model,temperature,task,run_ix,generation_time_s,ratio_success,ratio_pep8_violations,ratio_avg_cyclomatic_complexity,ratio_memory_usage_kb,ratio_runtime_time_s,ratio_std_lib_imports,ratio_third_party_imports
+qwen2.5-coder:3b,0.3,fft,1,110.08170413970947,1.0,1.0,1.0,0.00015083958042066384,0.0006182941574285884,1.0,1.5
+qwen2.5-coder:3b,0.3,fft,2,70.7852234840393,1.0,0.6666666666666666,1.0,1.3420548819400127,1.7817822759812392,1.0,1.5
+qwen2.5-coder:3b,0.3,fft,avg,90.43346381187439,1.0,0.8,1.0,0.0003016452575750002,0.0012361593566628014,1.0,1.5
