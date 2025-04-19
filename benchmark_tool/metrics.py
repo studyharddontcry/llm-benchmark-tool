@@ -4,16 +4,17 @@ import tempfile
 import os
 import re
 from typing import Dict, Any, Optional, List
-
-# For memory measurement: tracemalloc for Python 3.8+
-
 import pycodestyle
 import json
 import time
-import tracemalloc
+import tracemalloc # For memory measurement: tracemalloc for Python 3.8+
 import ast
 import sys
+from pathlib import Path
+from functools import lru_cache
 
+
+HUMAN_CODE_DIR = Path(__file__).parent / "HumanWrittenCodes"
 
 class CodeMetrics:
     """
@@ -271,3 +272,23 @@ class CodeMetrics:
             averaged[key] = sum(values) / len(values)
             
         return averaged
+    
+    @lru_cache(maxsize=None)
+    def evaluate_reference(self, task_id: str) -> Dict[str, Any]:
+        """
+        Compute raw metrics for the human‑written reference code of `task_id`.
+        Skips the `generation_time_s` metric (not meaningful here).
+        The result is cached so repeated calls are free.
+        """
+        ref_path = HUMAN_CODE_DIR / f"{task_id}.py"
+        if not ref_path.exists():
+            raise FileNotFoundError(f"No reference file for task '{task_id}': {ref_path}")
+
+        with ref_path.open("r", encoding="utf-8") as f:
+            code_str = f.read()
+
+        # 1 – we treat the reference as 'tests passed'
+        # 2 – generation_time_s is set to 0.0 and dropped afterwards
+        raw = self.evaluate(code_str, test_success=True, generation_time=0.0)
+        raw.pop("generation_time_s", None)          # remove key
+        return raw
