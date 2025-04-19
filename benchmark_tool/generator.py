@@ -121,5 +121,15 @@ Constraints:
                 cleaned_lines.append(line)
 
         result = '\n'.join(cleaned_lines).strip()
+        
+        code_lines = []
+        for line in result.splitlines():
+            if line.strip().startswith("import ") or line.strip().startswith("def ") or line.startswith(" "):
+                code_lines.append(line)
+            else:
+                # stop at the first narrative line
+                break
+        result = "\n".join(code_lines).strip()
+    
         self.logger.info("Code generated successfully.\nGenerated code:\n%s", result)
         return result, self.generation_time
