@@ -74,6 +74,7 @@ class BenchmarkRunner:
             "codes":         all_code,
             "test_outputs":  all_out,
             "avg":           avg_raw,
+            "reference":    self.ref_raw
         }
 
 
@@ -113,6 +114,12 @@ def main(argv: List[str] | None = None) -> None:
     print("\n" + "=" * 80)
     print(f"SUMMARY FOR TASK: {args.task}")
     print("=" * 80)
+    
+    print("\nREFERENCE (human‑written) RAW METRICS")
+    print("-" * 40)
+    for k, v in report["reference"].items():
+        print(f"{k:.<35} {v:.4f}")
+    
     print("\nAVERAGE RAW METRICS ACROSS RUNS")
     print("-" * 40)
     for k, v in report["avg"].items():
