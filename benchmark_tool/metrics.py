@@ -16,6 +16,16 @@ from functools import lru_cache
 
 HUMAN_CODE_DIR = Path(__file__).parent / "HumanWrittenCodes"
 
+BENEFIT_METRICS = {"success"}                   # higher is better
+COST_METRICS    = {                             # lower is better  
+    "pep8_violations",
+    "avg_cyclomatic_complexity",
+    "memory_usage_kb",
+    "runtime_time_s",
+    "std_lib_imports",
+    "third_party_imports",
+}
+
 class CodeMetrics:
     """
     A class to compute quality metrics for a generated Python code snippet.
@@ -292,3 +302,44 @@ class CodeMetrics:
         raw = self.evaluate(code_str, test_success=True, generation_time=0.0)
         raw.pop("generation_time_s", None)          # remove key
         return raw
+    
+    def normalise(
+        self,
+        avg_gen: Dict[str, Any],
+        ref: Dict[str, Any],
+    ) -> Dict[str, float]:
+        """
+        Produce a dict of ratio_… values according to the rule:
+            benefit metric → ratio = avg_gen / ref
+            cost    metric → ratio = ref     / avg_gen
+        generation_time_s is ignored (raw value handled elsewhere).
+        Division-by-zero is protected by a small epsilon.
+
+        Returns:
+            dict with keys like 'ratio_mem_kB', 'ratio_test_success', …
+        """
+        EPS = 1e-9
+        ratios: Dict[str, float] = {}
+
+        for key, ref_val in ref.items():
+            gen_val = avg_gen.get(key)
+
+            # Skip metrics not present or that we explicitly do not normalise
+            if gen_val is None or key == "generation_time_s":
+                continue
+
+            ref_val = ref_val if ref_val != 0 else EPS
+            gen_val = gen_val if gen_val != 0 else EPS
+
+            if key in BENEFIT_METRICS:
+                ratio = gen_val / ref_val
+            elif key in COST_METRICS:
+                ratio = ref_val / gen_val
+            else:
+                # by default treat as cost (conservative)
+                ratio = ref_val / gen_val
+
+            ratios[f"ratio_{key}"] = ratio
+
+        return ratios
+
