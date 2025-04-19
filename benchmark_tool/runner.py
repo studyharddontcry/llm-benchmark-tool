@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 
 class BenchmarkRunner:
-    """Programmatic wrapper around the end‑to‑end benchmarking pipeline."""
+    """Programmatic wrapper around the end-to-end benchmarking pipeline."""
 
     def __init__(
         self,
@@ -26,7 +26,7 @@ class BenchmarkRunner:
 
         self.generator = CodeGenerator(model_name=model, temperature=temperature)
         self.tester = CodeTester()
-        self.metrics_calculator = CodeMetrics()
+        self.metrics = CodeMetrics()
         
         # compute & cache human reference once
         self.ref_raw = self.metrics.evaluate_reference(task)
