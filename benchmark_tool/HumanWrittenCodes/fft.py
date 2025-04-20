@@ -1,16 +1,17 @@
+import numpy as np
+import matplotlib.pyplot as plt    
+import scipy.fftpack
+
 def plot_fft_spectrum(signal, fs):
-    """Plot the one-sided magnitude spectrum of a real signal.
+    """Plot the one‑sided magnitude spectrum of a real signal.
 
     Parameters
     ----------
-    signal : 1-D array_like
-        Time-domain samples.
+    signal : 1‑D array_like
+        Time‑domain samples.
     fs : float
         Sampling frequency in hertz.
     """
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import scipy.fftpack
     
     signal = np.asarray(signal, dtype=float)
     n_samples = signal.size
