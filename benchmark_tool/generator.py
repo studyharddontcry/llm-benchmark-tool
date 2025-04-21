@@ -34,7 +34,7 @@ class CodeGenerator:
 
     def __init__(self, model_name: str = "qwen2.5-coder:3b", temperature: float = 0.3):
         """
-        Initializes the CodeGenerator with a language model and a fixed chat-based prompt template.
+        Initializes the CodeGenerator with a language model and a chat-based prompt template.
 
         Args:
             model_name (str): The name of the language model to use.
@@ -44,9 +44,10 @@ class CodeGenerator:
         default_system_message = """
 You are an AI coding assistant. You must follow these rules at all costs:
 1. Output only valid, standalone Python code, NO Markdown as "```python".
-2. Absolutely no lines starting with '#' (in-line comments).
-3. Put all explanations in the function Google-style docstring.
-4. Include all necessary imports if needed.
+2. Output only function starting with 'def' and its body, NO test cases.
+3. Absolutely no lines starting with '#' (in-line comments).
+4. Put all explanations in the function Google-style docstring.
+5. Include necessary imports if needed.
 ANY violation makes the output INVALID.
 """
 
@@ -57,7 +58,7 @@ Write a complete, standalone Python function based on the description below:
 Constraints:
 - The code must be fully executable.
 - NO comments or explanations outside the docstring.
-- No anything else, just the code.
+- No anything else, just the function code, NO test cases.
 """
 
         # Create ChatPromptTemplate from system and user messages
