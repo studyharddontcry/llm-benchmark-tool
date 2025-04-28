@@ -12,11 +12,11 @@ flowchart LR
             RN[[runner.py<br/>BenchmarkRunner]]
         end
         PyT[pytest CLI]:::tool
+        TMP[/tmp workspace\n generated_code.py<br/> test_generated_code.py/]:::tmp
         Radon[radon cc]:::tool
         PEP8[pycodestyle]:::tool
         REF[[HumanWrittenCodes/<task>.py]]:::art
         CSV[[results/benchmark_metrics.csv]]:::art
-        TMP[/tmp workspace\n generated_code.py<br/> test_generated_code.py/]:::tmp
     end
 
     subgraph DOCKER["Docker container"]
@@ -46,5 +46,4 @@ flowchart LR
     classDef tool fill:#EFEFEF,stroke:#666
     classDef art  fill:#FFFFF0,stroke:#777
     classDef tmp  fill:#F6F6F6,stroke:#999,stroke-dasharray:3 3
-
 ```
