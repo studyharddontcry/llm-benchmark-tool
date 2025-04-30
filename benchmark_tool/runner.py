@@ -45,14 +45,14 @@ class BenchmarkRunner:
         append_csv_row(row)
 
     def run(self) -> Dict[str, Any]:
-        """Execute generation–test–metric cycles and log CSV rows."""
+        """Execute generation-test-metric cycles and log CSV rows."""
         all_raw:  List[Dict[str, Any]] = []
         all_code: List[str]             = []
         all_out:  List[str]             = []
 
         for i in tqdm(range(1, self.runs + 1), desc="Benchmarking runs"):
             code_str, gen_time = self.generator.generate(self.description)
-            success, test_out  = self.tester.test_code(code_str)
+            success, test_out  = self.tester.test_code(code_str, task=self.task)
             raw_metrics        = self.metrics.evaluate(code_str, success, gen_time)
 
             # ratios for this run
