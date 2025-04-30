@@ -9,9 +9,9 @@ def plot_resampled_signal(time, signal, n_samples):
 
     Parameters
     ----------
-    time : 1‑D array_like
+    time : 1-D array_like
         Original time axis.
-    signal : 1‑D array_like
+    signal : 1-D array_like
         Samples corresponding to `time`.
     n_samples : int
         Desired number of samples after resampling.
