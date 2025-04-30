@@ -172,7 +172,7 @@ def test_resampling_implementation():
     result = getattr(generated_code, "{function_name}")(signal, new_length)
     reference = signal.resample(signal, new_length)
     
-    assert len(result) == new_length, f"Resampled length should be {new_length}"
+    assert len(result) == new_length, f"Resampled length should be new_length"
     assert np.allclose(result, reference, rtol=1e-10), "Resampling differs from scipy.signal"
     assert isinstance(result, np.ndarray), "Result should be numpy array"
 """)
