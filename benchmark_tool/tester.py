@@ -107,41 +107,94 @@ class CodeTester:
             return match.group(1)
         return None
 
-    def _build_test_code(self, function_name: Optional[str]) -> str:
+    def _build_test_code(self, task: str) -> str:
         """
-        Creates a minimal Pytest test file. If function_name is found,
-        we import the code, check for the function name, and try calling it.
-        If function_name is None, we just test that the code can be imported.
+        Creates task-specific test file with appropriate assert tests.
+        
+        Args:
+            task (str): Name of the task to test (e.g., 'fft', 'inverse_fft')
         """
-        # Base test: ensure code can be imported
+        # Base imports needed for all tests
         test_code = [
             "import pytest",
+            "import numpy as np",
+            "from scipy import signal",
             "import generated_code"
         ]
 
-        # If we found a function name, let's test it
-        if function_name:
-            test_code.append(f"""
-def test_function_exists():
-    assert hasattr(generated_code, "{function_name}"), "Function '{function_name}' not found in generated_code."
-
-def test_function_call():
-    # Attempt a no-arg call
-    try:
-        result = getattr(generated_code, "{function_name}")()
-    except TypeError:
-        pytest.skip("Function requires arguments; skipping no-arg call.")
-    except Exception as e:
-        pytest.fail(f"Calling '{function_name}' raised an unexpected error: {{e}}")
-
-# Additional domain-specific checks could be added here
-""")
-        else:
-            # No function found, so let's just confirm the code imported
+        if task == "fft":
             test_code.append("""
-def test_import_only():
-    # Minimal check that the module imports without syntax error or crash
-    assert True
+def test_fft_implementation():
+    # Generate test signal
+    t = np.linspace(0, 1, 1000)
+    test_signal = np.sin(2 * np.pi * 10 * t)  # 10 Hz sinusoid
+    
+    # Get the function from generated code
+    result = generated_code.fft_function(test_signal)
+    reference = np.fft.fft(test_signal)
+    
+    # Test assertions
+    assert len(result) == len(test_signal), "FFT length should match input length"
+    assert np.allclose(np.abs(result), np.abs(reference), rtol=1e-10), "FFT magnitude differs from numpy.fft"
+    assert isinstance(result, np.ndarray), "Result should be numpy array"
+""")
+
+        elif task == "inverse_fft":
+            test_code.append("""
+def test_inverse_fft_implementation():
+    # Generate test spectrum
+    N = 1000
+    spectrum = np.zeros(N, dtype=complex)
+    spectrum[10] = 1  # Single frequency component
+    
+    # Test inverse FFT
+    result = generated_code.inverse_fft_function(spectrum)
+    reference = np.fft.ifft(spectrum)
+    
+    assert len(result) == N, "IFFT length should match input length"
+    assert np.allclose(result, reference, rtol=1e-10), "IFFT output differs from numpy.ifft"
+    assert np.all(np.abs(np.imag(result)) < 1e-10), "IFFT should return real signal"
+""")
+
+        elif task == "resampling":
+            test_code.append("""
+def test_resampling_implementation():
+    # Generate test signal
+    original_length = 1000
+    new_length = 500
+    t = np.linspace(0, 1, original_length)
+    signal = np.sin(2 * np.pi * 10 * t)
+    
+    # Test resampling
+    result = generated_code.resample_function(signal, new_length)
+    reference = signal.resample(signal, new_length)
+    
+    assert len(result) == new_length, f"Resampled length should be {new_length}"
+    assert np.allclose(result, reference, rtol=1e-10), "Resampling differs from scipy.signal"
+    assert isinstance(result, np.ndarray), "Result should be numpy array"
+""")
+
+        elif task == "convolution":
+            test_code.append("""
+def test_convolution_implementation():
+    # Test signals
+    signal = np.array([1, 2, 3, 4, 5])
+    kernel = np.array([0.5, 0.5])
+    
+    # Test convolution
+    result = generated_code.convolve_function(signal, kernel)
+    reference = np.convolve(signal, kernel, mode='full')
+    
+    assert len(result) == len(reference), "Convolution length incorrect"
+    assert np.allclose(result, reference, rtol=1e-10), "Convolution differs from numpy.convolve"
+    assert isinstance(result, np.ndarray), "Result should be numpy array"
+""")
+
+        else:
+            # Default test for unknown tasks
+            test_code.append("""
+def test_basic_implementation():
+    assert True, "No specific tests defined for this task"
 """)
 
         return "\n".join(test_code)
