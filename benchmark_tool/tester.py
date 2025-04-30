@@ -18,7 +18,7 @@ class CodeTester:
         if not self.logger.handlers:
             logging.basicConfig(level=logging.INFO)
 
-    def test_code(self, code_str: str) -> Tuple[bool, str]:
+    def test_code(self, code_str: str, task: str) -> Tuple[bool, str]:
         """
         Tests the generated Python code by:
             1) Writing it to a temporary file (generated_code.py).
@@ -51,7 +51,7 @@ class CodeTester:
                 f.write(code_str)
 
             # 2) Build a minimal test file
-            test_code = self._build_test_code(function_name)
+            test_code = self._build_test_code(task)
 
             # 3) Write the test file
             test_file_path = os.path.join(tmpdir, "test_generated_code.py")
