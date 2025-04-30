@@ -8,8 +8,6 @@ def fft_function(signal):
     ----------
     signal : 1-D array_like
         Input signal to be transformed.
-    sampling_rate : float
-        Sampling rate of the input signal.
 
     Returns
     -------
