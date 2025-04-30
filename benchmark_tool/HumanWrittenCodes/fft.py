@@ -1,6 +1,6 @@
 import numpy as np
 
-def fft_function(signal, sampling_rate):
+def fft_function(signal):
     """
     Perform FFT on a given signal and return the frequency and amplitude spectrum.
 
@@ -13,10 +13,8 @@ def fft_function(signal, sampling_rate):
 
     Returns
     -------
-    freq : ndarray
-        Frequencies corresponding to the FFT result.
-    amplitude : ndarray
-        Amplitude spectrum of the input signal.
+    fft_result : ndarray
+        FFT of the input signal.
     """
     signal = np.asarray(signal, dtype=float)
 
@@ -24,8 +22,3 @@ def fft_function(signal, sampling_rate):
     fft_result = np.fft.fft(signal)
 
     return fft_result
-
-test_signal = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-
-fft_result = fft_function(test_signal, 1000)
-print(f"fft result: {fft_result}")
