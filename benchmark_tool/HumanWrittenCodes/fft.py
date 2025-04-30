@@ -16,7 +16,6 @@ def fft_function(signal):
     """
     signal = np.asarray(signal, dtype=float)
 
-    n = len(signal)
     fft_result = np.fft.fft(signal)
 
     return fft_result

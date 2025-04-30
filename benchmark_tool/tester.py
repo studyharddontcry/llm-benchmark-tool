@@ -42,7 +42,12 @@ class CodeTester:
 
         # Try to find the *first* function name defined in the code
         function_name = self._find_function_name(code_str)
+        if not function_name:
+            return False, "No function definition found in generated code"
 
+        # Build test code with the actual function name
+        test_code = self._build_test_code(task, function_name)
+        
         # Create a temporary directory to store the generated code and test
         with tempfile.TemporaryDirectory() as tmpdir:
             # 1) Write the generated code to a file
@@ -50,15 +55,12 @@ class CodeTester:
             with open(code_file_path, "w", encoding="utf-8") as f:
                 f.write(code_str)
 
-            # 2) Build a minimal test file
-            test_code = self._build_test_code(task)
-
-            # 3) Write the test file
+            # 2) Write the test file
             test_file_path = os.path.join(tmpdir, "test_generated_code.py")
             with open(test_file_path, "w", encoding="utf-8") as f:
                 f.write(test_code)
 
-            # 4) Run pytest as a subprocess
+            # 3) Run pytest as a subprocess
             cmd = [
                 "pytest",
                 "--maxfail=1",
@@ -107,14 +109,14 @@ class CodeTester:
             return match.group(1)
         return None
 
-    def _build_test_code(self, task: str) -> str:
+    def _build_test_code(self, task: str, function_name: str) -> str:
         """
         Creates task-specific test file with appropriate assert tests.
         
         Args:
             task (str): Name of the task to test (e.g., 'fft', 'inverse_fft')
+            function_name (str): The actual name of the function found in generated code
         """
-        # Base imports needed for all tests
         test_code = [
             "import pytest",
             "import numpy as np",
@@ -123,14 +125,15 @@ class CodeTester:
         ]
 
         if task == "fft":
-            test_code.append("""
+            test_code.append(f"""
 def test_fft_implementation():
     # Generate test signal
     t = np.linspace(0, 1, 1000)
-    test_signal = np.sin(2 * np.pi * 10 * t)  # 10 Hz sinusoid
+    test_signal = np.sin(2 * np.pi * 10 * t)
+    test_signal = np.asarray(test_signal, dtype=float)
     
-    # Get the function from generated code
-    result = generated_code.fft_function(test_signal)
+    # Get the function from generated code using dynamic name
+    result = getattr(generated_code, "{function_name}")(test_signal)
     reference = np.fft.fft(test_signal)
     
     # Test assertions
@@ -140,7 +143,7 @@ def test_fft_implementation():
 """)
 
         elif task == "inverse_fft":
-            test_code.append("""
+            test_code.append(f"""
 def test_inverse_fft_implementation():
     # Generate test spectrum
     N = 1000
@@ -148,7 +151,7 @@ def test_inverse_fft_implementation():
     spectrum[10] = 1  # Single frequency component
     
     # Test inverse FFT
-    result = generated_code.inverse_fft_function(spectrum)
+    result = getattr(generated_code, "{function_name}")(spectrum)
     reference = np.fft.ifft(spectrum)
     
     assert len(result) == N, "IFFT length should match input length"
@@ -157,7 +160,7 @@ def test_inverse_fft_implementation():
 """)
 
         elif task == "resampling":
-            test_code.append("""
+            test_code.append(f"""
 def test_resampling_implementation():
     # Generate test signal
     original_length = 1000
@@ -166,7 +169,7 @@ def test_resampling_implementation():
     signal = np.sin(2 * np.pi * 10 * t)
     
     # Test resampling
-    result = generated_code.resample_function(signal, new_length)
+    result = getattr(generated_code, "{function_name}")(signal, new_length)
     reference = signal.resample(signal, new_length)
     
     assert len(result) == new_length, f"Resampled length should be {new_length}"
@@ -175,14 +178,14 @@ def test_resampling_implementation():
 """)
 
         elif task == "convolution":
-            test_code.append("""
+            test_code.append(f"""
 def test_convolution_implementation():
     # Test signals
     signal = np.array([1, 2, 3, 4, 5])
     kernel = np.array([0.5, 0.5])
     
     # Test convolution
-    result = generated_code.convolve_function(signal, kernel)
+    result = getattr(generated_code, "{function_name}")(signal, kernel)
     reference = np.convolve(signal, kernel, mode='full')
     
     assert len(result) == len(reference), "Convolution length incorrect"
