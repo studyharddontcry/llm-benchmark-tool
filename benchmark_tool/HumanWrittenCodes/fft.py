@@ -1,34 +1,31 @@
 import numpy as np
-import matplotlib.pyplot as plt    
-import scipy.fftpack
 
-def plot_fft_spectrum(signal, fs):
-    """Plot the one-sided magnitude spectrum of a real signal.
+def fft_function(signal, sampling_rate):
+    """
+    Perform FFT on a given signal and return the frequency and amplitude spectrum.
 
     Parameters
     ----------
     signal : 1-D array_like
-        Time-domain samples.
-    fs : float
-        Sampling frequency in hertz.
+        Input signal to be transformed.
+    sampling_rate : float
+        Sampling rate of the input signal.
+
+    Returns
+    -------
+    freq : ndarray
+        Frequencies corresponding to the FFT result.
+    amplitude : ndarray
+        Amplitude spectrum of the input signal.
     """
-    
     signal = np.asarray(signal, dtype=float)
-    n_samples = signal.size
 
-    # Fast Fourier Transform
-    yf = scipy.fftpack.fft(signal)
+    n = len(signal)
+    fft_result = np.fft.fft(signal)
 
-    # Frequency axis (positive half only)
-    xf = np.linspace(0.0, fs / 2, n_samples // 2, endpoint=False)
+    return fft_result
 
-    # One-sided magnitude spectrum
-    mag = 2.0 / n_samples * np.abs(yf[: n_samples // 2])
+test_signal = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-    fig, ax = plt.subplots()
-    ax.plot(xf, mag)
-    ax.set_xlabel("Frequency (Hz)")
-    ax.set_ylabel("Magnitude")
-    ax.set_title("Magnitude Spectrum (FFT Output)")
-    plt.tight_layout()
-    plt.show()
+fft_result = fft_function(test_signal, 1000)
+print(f"fft result: {fft_result}")
