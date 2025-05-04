@@ -8,19 +8,30 @@ import ast, textwrap, re
 
 def _strip_trailing_prose(code: str) -> str:
     """
-    Return the longest prefix of `code` that parses with `ast.parse`.
-    Drop any trailing narrative text that would break syntax.
+    Extract only valid Python code from the input string.
+    Removes both leading and trailing narrative text.
     """
     lines = code.splitlines()
-    for i in range(len(lines), 0, -1):
-        candidate = "\n".join(lines[:i])
+    start_idx = 0
+    end_idx = len(lines)
+    
+    # Find first line of actual code
+    for i, line in enumerate(lines):
+        if line.strip().startswith(('import ', 'from ', 'def ')):
+            start_idx = i
+            break
+    
+    # Try parsing incrementally larger chunks
+    best_code = code  # fallback to original if nothing parses
+    for i in range(start_idx, len(lines)):
+        candidate = '\n'.join(lines[start_idx:i+1])
         try:
             ast.parse(candidate)
-            return candidate.strip()
+            best_code = candidate
         except SyntaxError:
             continue
-    # if nothing parses, return original
-    return code.strip()
+    
+    return best_code.strip()
 
 
 class CodeGenerator:
@@ -118,10 +129,22 @@ Constraints:
             self.generation_time = end_time - start_time
             self.logger.info("Code generation took %.4f seconds", self.generation_time)
             
-        # Strip any markdown code block syntax
+        # Strip markdown and clean initial text
         result = result.strip().replace('```python', '').replace('```', '')
-
-        # Remove inline comments while preserving docstrings
+        
+        # Remove any introductory text before the first import or def
+        code_lines = []
+        started_code = False
+        
+        for line in result.splitlines():
+            if line.strip().startswith(("import ", "def ", "from ")):
+                started_code = True
+            if started_code:
+                code_lines.append(line)
+        
+        result = '\n'.join(code_lines).strip()
+        
+        # Apply existing cleaning for docstrings and comments
         lines = result.split('\n')
         cleaned_lines = []
         in_docstring = False
@@ -141,15 +164,6 @@ Constraints:
                 cleaned_lines.append(line)
 
         result = '\n'.join(cleaned_lines).strip()
-        
-        # code_lines = []
-        # for line in result.splitlines():
-        #     if line.strip().startswith("import ") or line.strip().startswith("def ") or line.startswith(" "):
-        #         code_lines.append(line)
-        #     else:
-        #         # stop at the first narrative line
-        #         break
-        # result = "\n".join(code_lines).strip()
         
         result = _strip_trailing_prose(result)
     

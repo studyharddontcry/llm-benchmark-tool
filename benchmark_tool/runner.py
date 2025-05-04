@@ -1,9 +1,9 @@
 import argparse
 from typing import List, Dict, Any
 
-from benchmark_tool.generator import CodeGenerator
-from benchmark_tool.tester import CodeTester
-from benchmark_tool.metrics import CodeMetrics, append_csv_row
+from generator import CodeGenerator
+from tester import CodeTester
+from metrics import CodeMetrics, append_csv_row
 from tqdm import tqdm
 
 

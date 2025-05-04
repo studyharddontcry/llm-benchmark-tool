@@ -1,18 +1,18 @@
 # Define arrays of models and tasks
 $models = @(
-    "qwen2.5:3b"
-    "qwen2.5-coder:3b",
-    "qwen2.5-coder:7b",
-    "codegemma:2b",
-    "codegemma:latest"
+    # "qwen2.5:3b",
+    # "qwen2.5-coder:3b",
+    # "qwen2.5-coder:7b",
+    "granite-code:3b",
+    "granite-code:8b"
 )
 
 $tasks = @{
-    "fft" = "Write a function that performs FFT on a given signal and returns the frequency spectrum."
-    "inverse_fft" = "Write a function that performs inverse FFT on a frequency spectrum and returns the time domain signal."
-    "resampling" = "Write a function that resamples a signal to a new length using interpolation."
-    "convolution" = "Write a function that performs convolution of two signals (or signal and a kernel) and returns the result."
-    "signal_generation" = "Write a function that generates a sine wave with specified frequency, sample rate, and duration."
+    "fft" = "Write a function that performs FFT on a given signal and returns the frequency spectrum. Parameters: signal : numpy.ndarray - Input signal (1D array) to be transformed. Must be converted to float type. Returns: numpy.ndarray - FFT of the input signal with the same length as input. Use numpy library."
+    "inverse_fft" = "Write a function that performs inverse FFT on a frequency spectrum and returns the time domain signal. Parameters: spectrum : numpy.ndarray - Input spectrum (complex array). Returns: numpy.ndarray - Inverse FFT of the input spectrum. Use numpy library."
+    "resampling" = "Write a function that resamples a signal to a new length. Parameters: input_signal : numpy.ndarray - Input signal to resample, new_length : int - Desired length of output signal. Returns: numpy.ndarray - Resampled signal. Use scipy library."
+    "convolution" = "Write a function that performs convolution of two signals. Parameters: signal : numpy.ndarray - Input signal array, kernel : numpy.ndarray - Convolution kernel. Returns: numpy.ndarray - Full convolution result. Use numpy library."
+    "signal_generation" = "Write a function that generates a sine wave. Parameters: frequency : float - Frequency in Hz, sample_rate : float - Sampling rate in Hz, duration : float - Duration in seconds. Returns: numpy.ndarray - Array containing the generated sine wave samples."
 }
 
 # Settings
@@ -23,8 +23,8 @@ $runs = 10
 $total = $models.Length * $tasks.Count
 $current = 0
 
-# Set PYTHONPATH to include parent directory
-$env:PYTHONPATH = (Get-Location).Path
+# Set working directory to script location
+Set-Location $PSScriptRoot
 
 # Run all combinations
 foreach ($model in $models) {

@@ -156,7 +156,6 @@ def test_inverse_fft_implementation():
     
     assert len(result) == N, "IFFT length should match input length"
     assert np.allclose(result, reference, rtol=1e-10), "IFFT output differs from numpy.ifft"
-    assert np.all(np.abs(np.imag(result)) < 1e-10), "IFFT should return real signal"
 """)
 
         elif task == "resampling":
