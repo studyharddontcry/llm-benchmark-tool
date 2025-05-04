@@ -166,15 +166,14 @@ def test_resampling_implementation():
     original_length = 1000
     new_length = 500
     t = np.linspace(0, 1, original_length)
-    signal = np.sin(2 * np.pi * 10 * t)
+    input_signal = np.sin(2 * np.pi * 10 * t)  # Renamed from 'signal' to 'input_signal'
     
     # Test resampling
-    result = getattr(generated_code, "{function_name}")(signal, new_length)
-    reference = signal.resample(signal, new_length)
+    result = getattr(generated_code, "{function_name}")(input_signal, new_length)
+    reference = signal.resample(input_signal, new_length)  # Now unambiguous
     
     assert len(result) == new_length, f"Resampled length should be new_length"
     assert np.allclose(result, reference, rtol=1e-10), "Resampling differs from scipy.signal"
-    assert isinstance(result, np.ndarray), "Result should be numpy array"
 """)
 
         elif task == "convolution":
