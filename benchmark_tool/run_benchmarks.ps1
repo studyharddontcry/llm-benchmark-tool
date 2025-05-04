@@ -1,16 +1,17 @@
 # Define arrays of models and tasks
 $models = @(
+    "qwen2.5:3b"
     "qwen2.5-coder:3b",
     "qwen2.5-coder:7b",
-    "codellama:7b",
-    "llama2:7b"
+    "codegemma:2b",
+    "codegemma:latest"
 )
 
 $tasks = @{
     "fft" = "Write a function that performs FFT on a given signal and returns the frequency spectrum."
     "inverse_fft" = "Write a function that performs inverse FFT on a frequency spectrum and returns the time domain signal."
     "resampling" = "Write a function that resamples a signal to a new length using interpolation."
-    "convolution" = "Write a function that performs convolution of two signals and returns the result."
+    "convolution" = "Write a function that performs convolution of two signals (or signal and a kernel) and returns the result."
     "signal_generation" = "Write a function that generates a sine wave with specified frequency, sample rate, and duration."
 }
 
