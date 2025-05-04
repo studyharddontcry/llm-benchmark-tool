@@ -23,6 +23,9 @@ $runs = 10
 $total = $models.Length * $tasks.Count
 $current = 0
 
+# Set PYTHONPATH to include parent directory
+$env:PYTHONPATH = (Get-Location).Path
+
 # Run all combinations
 foreach ($model in $models) {
     foreach ($taskEntry in $tasks.GetEnumerator()) {
