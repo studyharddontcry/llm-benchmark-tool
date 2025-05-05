@@ -190,6 +190,46 @@ def test_convolution_implementation():
     assert np.allclose(result, reference, rtol=1e-10), "Convolution differs from numpy.convolve"
     assert isinstance(result, np.ndarray), "Result should be numpy array"
 """)
+            
+        elif task == "low_pass_filter":
+            test_code.append(f"""
+def test_low_pass_filter_implementation():
+    # Test parameters
+    fs = 500 
+    t = np.linspace(0, 1, fs, endpoint=False)
+    
+    # Create test signal with low (5 Hz) and high (50 Hz) frequency components
+    low_freq = np.sin(2 * np.pi * 5 * t)
+    high_freq = 0.5 * np.sin(2 * np.pi * 50 * t)
+    input_signal = low_freq + high_freq
+    
+    result = getattr(generated_code, "{function_name}")(
+        input_signal=input_signal,
+        fs=fs,
+        cutoff_freq=10,
+        order=4
+    )
+    
+    # Basic assertions
+    assert len(result) == len(input_signal), "Output length must match input length"
+    
+    # Filter behavior assertions
+    assert np.std(result) < np.std(input_signal), "Filtered signal should have lower variance"
+    
+    # Frequency content assertions
+    fft_orig = np.fft.fft(input_signal)
+    fft_filt = np.fft.fft(result)
+    freqs = np.fft.fftfreq(len(t), 1/fs)
+    
+    # Check high frequencies are attenuated
+    high_freq_mask = np.abs(freqs) > 10
+    assert np.mean(np.abs(fft_filt[high_freq_mask])) < np.mean(np.abs(fft_orig[high_freq_mask])), "High frequencies not properly attenuated"
+    
+    # Check low frequencies are preserved
+    low_freq_mask = np.abs(freqs) < 10
+    low_freq_diff = np.mean(np.abs(fft_filt[low_freq_mask] - fft_orig[low_freq_mask]))
+    assert low_freq_diff < 1e-10, "Low frequencies not properly preserved"
+""")
 
         else:
             # Default test for unknown tasks
