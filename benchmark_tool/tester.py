@@ -66,6 +66,8 @@ class CodeTester:
                 "--maxfail=1",
                 "--disable-warnings",
                 "--tb=short",
+                "-v",
+                "--no-header",
                 test_file_path
             ]
 
@@ -84,7 +86,7 @@ class CodeTester:
             if success:
                 self.logger.info("Pytest: All tests passed successfully.")
             else:
-                self.logger.warning("Pytest: Some tests failed.")
+                self.logger.warning("Pytest: Some tests failed. Output:\n%s", out)
 
             return success, out
 
@@ -203,6 +205,7 @@ def test_low_pass_filter_implementation():
     high_freq = 0.5 * np.sin(2 * np.pi * 50 * t)
     input_signal = low_freq + high_freq
     
+    # Get result from generated function
     result = getattr(generated_code, "{function_name}")(
         input_signal=input_signal,
         fs=fs,
@@ -210,25 +213,15 @@ def test_low_pass_filter_implementation():
         order=4
     )
     
-    # Basic assertions
+    # Create reference using scipy implementation
+    nyq = 0.5 * fs
+    normalized_cutoff = 10 / nyq
+    b, a = signal.butter(4, normalized_cutoff, btype='low')
+    reference = signal.lfilter(b, a, input_signal)
+    
+    # Test assertions
     assert len(result) == len(input_signal), "Output length must match input length"
-    
-    # Filter behavior assertions
-    assert np.std(result) < np.std(input_signal), "Filtered signal should have lower variance"
-    
-    # Frequency content assertions
-    fft_orig = np.fft.fft(input_signal)
-    fft_filt = np.fft.fft(result)
-    freqs = np.fft.fftfreq(len(t), 1/fs)
-    
-    # Check high frequencies are attenuated
-    high_freq_mask = np.abs(freqs) > 10
-    assert np.mean(np.abs(fft_filt[high_freq_mask])) < np.mean(np.abs(fft_orig[high_freq_mask])), "High frequencies not properly attenuated"
-    
-    # Check low frequencies are preserved
-    low_freq_mask = np.abs(freqs) < 10
-    low_freq_diff = np.mean(np.abs(fft_filt[low_freq_mask] - fft_orig[low_freq_mask]))
-    assert low_freq_diff < 1e-10, "Low frequencies not properly preserved"
+    assert np.allclose(result, reference, rtol=1e-10), "Filter output differs from scipy.signal reference"
 """)
 
         else:

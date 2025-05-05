@@ -207,13 +207,13 @@ class CodeMetrics:
             memory_usage_kb (float): approximate peak memory usage in kB
             runtime_s (float): time in seconds to import and call the function
 
-        If no function is found, we just import the code for measurement.
+        If no function is found, the code is imported for measurement.
         """
         # Find a function name (similar logic to what's in tester.py)
         func_name = self._find_function_name(code_str)
 
-        # We'll run in the current Python process using `exec`.
-        # We'll measure with tracemalloc for memory, and time.time() for runtime.
+        # run in the current Python process using `exec`.
+        # tracemalloc for memory, and time.time() for runtime.
         # This is a rough estimate – a more accurate approach would spawn a separate process.
 
         # Setup environment in which we will exec() the code
@@ -230,7 +230,7 @@ class CodeMetrics:
             # 1) Exec the code in local_vars
             exec(code_str, local_vars, local_vars)
 
-            # 2) If we found a function, call it
+            # 2) If function is found, it is called
             if func_name and func_name in local_vars:
                 func = local_vars[func_name]
                 # Call with no arguments if possible
