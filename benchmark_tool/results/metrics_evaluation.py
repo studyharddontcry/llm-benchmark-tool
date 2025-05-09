@@ -5,40 +5,70 @@ import matplotlib.pyplot as plt
 
 # Read and prepare data
 df = pd.read_csv("benchmark_metrics.csv", sep=',')
+
+# df_non_avg = df[df['run_ix'] != 'avg']
+
 df = df[df['run_ix'] == 'avg']
 
-# First heatmap: Overall model performance
+# Create pivot table
 pivot_overall = df.pivot_table(
     index='model',
-    values=['ratio_success', 'generation_time_s', 'ratio_memory_usage_kb', 'ratio_pep8_violations', 'ratio_runtime_time_s', 'ratio_std_lib_imports', 'ratio_third_party_imports']
+    values=['ratio_success', 'generation_time_s', 'ratio_memory_usage_kb',
+            'ratio_pep8_violations', 'ratio_runtime_time_s',
+            'ratio_third_party_imports']
 )
 
-# Heatmap for overall metrics
-plt.figure(figsize=(12, 8))
-sns.heatmap(
-    pivot_overall,
-    annot=True,
-    fmt='.2f',
-    cmap='RdYlGn',
-    center=0.5,
-    robust=True
-)
+# Set up figure
+fig, ax = plt.subplots(figsize=(15, 10))
 
-plt.title('Overall Model Performance Metrics')
-plt.ylabel('Model')
-plt.xlabel('Metrics')
-plt.xticks(rotation=45, ha='right')
+# Define individual colormaps for each metric
+colormaps = {
+    'generation_time_s': 'YlOrRd_r',       # Time metrics (lower is better)
+    'ratio_memory_usage_kb': 'Blues',      # Memory usage
+    'ratio_pep8_violations': 'Purples_r',  # Violations (lower is better)
+    'ratio_runtime_time_s': 'Greens',      # Runtime
+    'ratio_success': 'RdYlGn',             # Success rate (higher is better)
+    'ratio_third_party_imports': 'Reds'    # Third-party imports
+}
+
+# Create a mask to plot one column at a time
+mask = np.zeros_like(pivot_overall, dtype=bool)
+
+# Plot each column with its own colormap
+for i, column in enumerate(pivot_overall.columns):
+    mask[:] = True
+    mask[:, i] = False  # Only show current column
+    
+    sns.heatmap(
+        pivot_overall,
+        annot=True,
+        fmt='.2f',
+        cmap=colormaps[column],
+        mask=mask,
+        ax=ax,
+        cbar=False,
+        annot_kws={'size': 16} # Adjust annotation size
+    )
+
+# Final formatting with larger font sizes
+plt.rcParams.update({'font.size': 14})  # Increase base font size
+ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right', fontsize=14)
+ax.set_yticklabels(ax.get_yticklabels(), rotation=0, fontsize=14)
+ax.set_title('Overall Model Performance Metrics', pad=20, fontsize=16)
+ax.set_xlabel('Metrics', fontsize=14)
+ax.set_ylabel('Models', fontsize=14)
+
 plt.tight_layout()
-plt.savefig('model_metrics_overall_heatmap.png', dpi=300, bbox_inches='tight')
+plt.savefig(r"C:\Users\bv2504\Documents\Studium\Ing\DATA_ENG_OBOR\Diplom_Thesis\benchmark_tool\results\model_metrics_overall_heatmap.png", dpi=300, bbox_inches='tight')
 plt.close()
 
 sns.set_theme(style="whitegrid")
 
-plt.figure(figsize=(9, 6))
-sns.barplot(data=df, x="temperature", y="ratio_success", hue="model", errorbar="ci", palette="Set2")
-plt.title("Success Ratio Across Models by Temperature")
+plt.figure(figsize=(12, 6))
+sns.boxplot(data=df, x="temperature", y="ratio_success", hue="model", palette="Set2", width=0.6) 
+plt.title("Success Ratio Distribution Across Models by Temperature")
 plt.xlabel("Temperature")
-plt.ylabel("Mean Success Ratio")
+plt.ylabel("Success Ratio")
 plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
 plt.savefig("success_by_temperature_model.png", dpi=300)
@@ -98,9 +128,9 @@ sns.barplot(
     y="model",
     palette="crest"
 )
-plt.xlabel("Success Ratio")
+plt.xlabel("Fraction")
 plt.ylabel("Model")
-plt.title("Ratio of Successful Tasks per Model")
+plt.title("Proportion of Perfectly Solved Tasks per Model")
 plt.xlim(0, 1.05)
 plt.tight_layout()
 plt.savefig("success_ratio_per_model.png", dpi=300)
