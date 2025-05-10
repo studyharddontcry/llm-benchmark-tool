@@ -58,7 +58,7 @@ ax.set_xlabel('Metrics', fontsize=14)
 ax.set_ylabel('Models', fontsize=14)
 
 plt.tight_layout()
-plt.savefig(r"C:\Users\bv2504\Documents\Studium\Ing\DATA_ENG_OBOR\Diplom_Thesis\benchmark_tool\results\model_metrics_overall_heatmap.png", dpi=300, bbox_inches='tight')
+plt.savefig("model_metrics_overall_heatmap.png", dpi=300, bbox_inches='tight')
 plt.close()
 
 sns.set_theme(style="whitegrid")
