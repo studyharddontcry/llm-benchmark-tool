@@ -50,7 +50,6 @@ for i, column in enumerate(pivot_overall.columns):
         annot_kws={'size': 16} # Adjust annotation size
     )
 
-# Final formatting with larger font sizes
 plt.rcParams.update({'font.size': 14})  # Increase base font size
 ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right', fontsize=14)
 ax.set_yticklabels(ax.get_yticklabels(), rotation=0, fontsize=14)
